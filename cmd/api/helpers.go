@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/julienschmidt/httprouter"
 	"io"
 	"net/http"
 	"strconv"
@@ -13,7 +14,8 @@ import (
 // readIdParam convert id parameter into int based 10 with 64 bits.
 // returns an id and correspond error
 func (app *application) readIdParam(r *http.Request) (int64, error) {
-	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	params := httprouter.ParamsFromContext(r.Context())
+	id, err := strconv.ParseInt(params.ByName("id"), 10, 64)
 	if err != nil {
 		return 0, errors.New("invalid id parameter")
 	}
@@ -64,11 +66,10 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data envelo
 }
 
 /*
-	The readJSON function decode the request body into the target destination.
-
+The readJSON function decode the request body into the target destination.
 Also check the vulnerabilities from Developers, Users, Expected errors, or Unexpected errors.
 
-	USAGE:
+USAGE:
 
 	var input struct {
 		Title   string   `json:"title"`
@@ -77,8 +78,9 @@ Also check the vulnerabilities from Developers, Users, Expected errors, or Unexp
 		Genres  []string `json:"genres"`
 	}
 
-	// read the request body
-	err := app.readJSON(w, r, &input)
+// read the request body
+err := app.readJSON(w, r, &input)
+
 	if err != nil {
 		app.badRequestResponse(w, r, err.Error())
 		return
