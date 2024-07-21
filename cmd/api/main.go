@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	_ "github.com/lib/pq"
+	"github.com/minhnghia2k3/greenlight/internal/data"
 	"log"
 	"net/http"
 	"os"
@@ -30,6 +31,7 @@ type config struct {
 type application struct {
 	config config
 	logger *log.Logger
+	models *data.Models
 }
 
 func main() {
@@ -47,17 +49,19 @@ func main() {
 	// creates a new Logger which writes to the std out stream
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
-	// Declare an instance of application struct
-	app := &application{
-		config: cfg,
-		logger: logger,
-	}
-
+	// Create a connection pool
 	db, err := openDB(cfg)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer db.Close()
+
+	// Declare an instance of application struct
+	app := &application{
+		config: cfg,
+		logger: logger,
+		models: data.NewModels(db),
+	}
 
 	logger.Print("database connection pool established")
 
