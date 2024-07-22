@@ -7,6 +7,7 @@ import (
 
 var (
 	ErrRecordNotFound = errors.New("record not found")
+	ErrConflictEdit   = errors.New("edit conflict")
 )
 
 type IModel interface {
