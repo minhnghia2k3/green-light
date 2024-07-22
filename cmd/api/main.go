@@ -7,6 +7,7 @@ import (
 	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/minhnghia2k3/greenlight/internal/data"
+	"github.com/minhnghia2k3/greenlight/internal/jsonlog"
 	"log"
 	"net/http"
 	"os"
@@ -30,7 +31,7 @@ type config struct {
 // Application struct hold the HTTP handlers, helpers, and middleware
 type application struct {
 	config config
-	logger *log.Logger
+	logger *jsonlog.Logger
 	models *data.Models
 }
 
@@ -47,12 +48,12 @@ func main() {
 	flag.Parse()
 
 	// creates a new Logger which writes to the std out stream
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 
 	// Create a connection pool
 	db, err := openDB(cfg)
 	if err != nil {
-		log.Fatal(err)
+		logger.PrintFatal(err, nil)
 	}
 	defer db.Close()
 
@@ -63,20 +64,21 @@ func main() {
 		models: data.NewModels(db),
 	}
 
-	logger.Print("database connection pool established")
+	logger.PrintInfo("database connection pool established", nil)
 
 	// Declare an HTTP server
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
 		Handler:      app.routes(),
+		ErrorLog:     log.New(logger, "", 0),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
 	}
 
 	// Start the HTTP server
-	logger.Printf("starting %s server on %s", cfg.env, srv.Addr)
-	log.Fatal(srv.ListenAndServe())
+	logger.PrintInfo(fmt.Sprintf("starting %s server on %s", cfg.env, srv.Addr), nil)
+	logger.PrintFatal(srv.ListenAndServe(), nil)
 }
 
 // openDB function returns a sql.DB connection pool

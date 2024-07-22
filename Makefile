@@ -9,7 +9,7 @@ migrate.up:
 
 
 migrate.down:
-	migrate -path=./migrations -database=postgres://root:secret@localhost:5432/greenlight?sslmode=disable down
+	migrate -path=./migrations -database=postgres://root:secret@localhost:5432/greenlight?sslmode=disable down 1
 
 
 PHONY: run
