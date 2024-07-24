@@ -4,12 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"flag"
-	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/minhnghia2k3/greenlight/internal/data"
 	"github.com/minhnghia2k3/greenlight/internal/jsonlog"
-	"log"
-	"net/http"
 	"os"
 	"time"
 )
@@ -76,20 +73,10 @@ func main() {
 	}
 
 	logger.PrintInfo("database connection pool established", nil)
-
-	// Declare an HTTP server
-	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", cfg.port),
-		Handler:      app.routes(),
-		ErrorLog:     log.New(logger, "", 0),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
+	err = app.serve()
+	if err != nil {
+		logger.PrintFatal(err, nil)
 	}
-
-	// Start the HTTP server
-	logger.PrintInfo(fmt.Sprintf("starting %s server on %s", cfg.env, srv.Addr), nil)
-	logger.PrintFatal(srv.ListenAndServe(), nil)
 }
 
 // openDB function returns a sql.DB connection pool
