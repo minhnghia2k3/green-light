@@ -20,11 +20,13 @@ type IModel interface {
 // Models struct which is base model
 type Models struct {
 	Movies MovieModel
+	Users  UserModel
 }
 
 // NewModels is a constructor
 func NewModels(db *sql.DB) *Models {
 	return &Models{
 		Movies: MovieModel{DB: db},
+		Users:  UserModel{DB: db},
 	}
 }

@@ -11,5 +11,10 @@ migrate.up:
 migrate.down:
 	migrate -path=./migrations -database=postgres://root:secret@localhost:5432/greenlight?sslmode=disable down 1
 
+docker.start:
+	docker start postgres_db
+
+docker.stop:
+	docker stop postgres_db
 
 PHONY: run
