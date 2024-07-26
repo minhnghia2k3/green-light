@@ -54,8 +54,20 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// Write a JSON response containing the user data along with 201 Created Status
-	err = app.writeJSON(w, http.StatusCreated, envelop{"user": user}, nil)
+	// Background goroutine to send email
+	app.background(func() {
+		// Send welcome email
+		err = app.mailer.Send(user.Email, "user_welcome.tmpl", user)
+		if err != nil {
+			// If error, use log instead sending http error.
+			app.logger.PrintError(err, nil)
+		}
+		app.logger.PrintInfo("sending email successfully", nil)
+	})
+
+	// http.StatusAccepted indicates that the request has been accepted,
+	// but processing has not been completed.
+	err = app.writeJSON(w, http.StatusAccepted, envelop{"user": user}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
