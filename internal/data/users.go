@@ -14,6 +14,8 @@ var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 )
 
+var AnonymousUser = &User{}
+
 type User struct {
 	ID        int64     `json:"id"`
 	CreatedAt time.Time `json:"created_at"`
@@ -31,6 +33,11 @@ type password struct {
 
 type UserModel struct {
 	DB *sql.DB
+}
+
+// IsAnonymous Check if a User instance is the AnonymousUser.
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
 }
 
 // The Set method calculates the bcrypt hash of a plaintext password,
@@ -126,6 +133,7 @@ WHERE email = $1`
 		&user.CreatedAt,
 		&user.Name,
 		&user.Email,
+		&user.Password.hash,
 		&user.Activated,
 		&user.Version,
 	)
@@ -193,7 +201,7 @@ func (m UserModel) GetForToken(scope string, tokenPlainText string) (*User, erro
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
-	args := []any{tokenHash[:], scope, time.Now()}
+	args := []any{tokenHash[:], scope, time.Now().UTC()}
 
 	err := m.DB.QueryRowContext(ctx, query, args...).Scan(
 		&user.ID,
