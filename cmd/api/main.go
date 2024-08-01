@@ -3,12 +3,14 @@ package main
 import (
 	"context"
 	"database/sql"
+	"expvar"
 	"flag"
 	_ "github.com/lib/pq"
 	"github.com/minhnghia2k3/greenlight/internal/data"
 	"github.com/minhnghia2k3/greenlight/internal/jsonlog"
 	"github.com/minhnghia2k3/greenlight/internal/mailer"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -90,6 +92,24 @@ func main() {
 		logger.PrintFatal(err, nil)
 	}
 	defer db.Close()
+
+	// Metrics
+	expvar.NewString("version").Set(version)
+
+	// publish the number of active goroutines.
+	expvar.Publish("goroutines", expvar.Func(func() any {
+		return runtime.NumGoroutine()
+	}))
+
+	// publish the database connection pool statistics.
+	expvar.Publish("database", expvar.Func(func() any {
+		return db.Stats()
+	}))
+
+	// Publish the current unix timestamp.
+	expvar.Publish("timestamp", expvar.Func(func() any {
+		return time.Now().Unix()
+	}))
 
 	// Declare an instance of application struct
 	app := &application{
