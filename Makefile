@@ -1,5 +1,6 @@
+CORSFLAGS?=
 run:
-	go run ./cmd/api
+	go run ./cmd/api -cors-trusted-origins=$(CORSFLAGS)
 
 healthcheck:
 	curl -i http://localhost:4000/v1/healthcheck
