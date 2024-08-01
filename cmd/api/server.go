@@ -10,6 +10,8 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	_ "net/http/pprof"
 )
 
 func (app *application) serve() error {

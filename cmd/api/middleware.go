@@ -6,7 +6,6 @@ import (
 	"github.com/minhnghia2k3/greenlight/internal/data"
 	"github.com/minhnghia2k3/greenlight/internal/validation"
 	"golang.org/x/time/rate"
-	"log"
 	"net"
 	"net/http"
 	"strings"
@@ -107,7 +106,6 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 
 		// Otherwise
 		headerParts := strings.Split(authorizationHeader, " ")
-		log.Print("header parts: ", headerParts)
 		if len(headerParts) != 2 || headerParts[0] != "Bearer" {
 			app.invalidAuthenticationTokenResponse(w, r)
 			return
@@ -141,4 +139,59 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 		// Call the next handler chain
 		next.ServeHTTP(w, r)
 	})
+}
+
+func (app *application) requireAuthenticatedUser(next http.HandlerFunc) http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := app.contextGetUser(r)
+
+		if user.IsAnonymous() {
+			app.authenticationRequiredResponse(w, r)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (app *application) requireActivatedUser(next http.HandlerFunc) http.HandlerFunc {
+	fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Retrieve the user information from the request context
+		user := app.contextGetUser(r)
+
+		// If the user not activated, return 403 error
+		if user.Activated == false {
+			app.inactiveAccountResponse(w, r)
+			return
+		}
+
+		// Call the next handler in chain
+		next.ServeHTTP(w, r)
+	})
+
+	// Wrap fn with the requireAuthenticatedUser() middleware before returning it.
+	return app.requireAuthenticatedUser(fn)
+}
+
+func (app *application) requirePermission(code string, next http.HandlerFunc) http.HandlerFunc {
+	fn := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		user := app.contextGetUser(r)
+
+		// Get user's permissions
+		permissions, err := app.models.Permissions.GetAllForUser(user.ID)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+
+		// Check permissions slice contain code
+		if !permissions.Include(code) {
+			app.notPermittedResponse(w, r)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+
+	return app.requireActivatedUser(fn)
 }
