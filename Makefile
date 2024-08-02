@@ -18,7 +18,7 @@ confirm:
 
 ## run: run the cmd/api application
 run:
-	go run ./cmd/api -db-dsn=${GREENLIGHT_DB_DSN}
+	go run ./cmd/api -db-dsn=${GREENLIGHT_DB_DSN} -smtp-username=${SMTP_USERNAME} -smtp-password=${SMTP_PASSWORD} -smtp-sender=${SMTP_SENDER}
 
 ## healthcheck: perform GET to api /v1/healthcheck
 healthcheck:
