@@ -84,7 +84,7 @@ func main() {
 		intPort = 4000
 	}
 	flag.IntVar(&cfg.port, "port", intPort, "API server port")
-	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
+	flag.StringVar(&cfg.env, "env", os.Getenv("ENVIRONMENT"), "Environment (development|staging|production)")
 
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("DATABASE_URL"), "PostgreSQL DSN")
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
