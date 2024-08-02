@@ -66,6 +66,12 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 	}()
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// Bypass rate limiting for swagger routes
+		if strings.HasPrefix(r.URL.Path, "/swagger") {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		if app.config.limiter.enabled {
 			// Use the realip.FromRequest() function to get the client's real IP address.
 			ip := realip.FromRequest(r)

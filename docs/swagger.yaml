@@ -1,0 +1,52 @@
+basePath: /v1
+definitions:
+  main.Error:
+    properties:
+      error: {}
+    type: object
+  main.Status:
+    properties:
+      status:
+        type: string
+      system_information:
+        $ref: '#/definitions/main.SystemInformation'
+    type: object
+  main.SystemInformation:
+    properties:
+      environment:
+        type: string
+      version:
+        type: string
+    type: object
+host: localhost:4000
+info:
+  contact:
+    email: support@swagger.io
+    name: API Support
+    url: https://github.com/minhnghia2k3
+  description: This is public API for movies management
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  termsOfService: https://github.com/minhnghia2k3/
+  title: Greenlight Public API
+  version: "1.0"
+paths:
+  /healthcheck:
+    get:
+      description: show server status and information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.Status'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Show server information
+      tags:
+      - Server
+swagger: "2.0"

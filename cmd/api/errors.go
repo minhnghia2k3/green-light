@@ -6,6 +6,10 @@ import (
 	"net/http"
 )
 
+type Error struct {
+	Error any `json:"error"`
+}
+
 // The logError() method is a generic helper for logging an error message.
 func (app *application) logError(r *http.Request, err error) {
 	app.logger.PrintError(err, map[string]string{

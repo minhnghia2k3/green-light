@@ -7,6 +7,7 @@ import (
 	"flag"
 	"fmt"
 	_ "github.com/lib/pq"
+	_ "github.com/minhnghia2k3/greenlight/docs"
 	"github.com/minhnghia2k3/greenlight/internal/data"
 	"github.com/minhnghia2k3/greenlight/internal/jsonlog"
 	"github.com/minhnghia2k3/greenlight/internal/mailer"
@@ -58,6 +59,20 @@ type application struct {
 	wg     sync.WaitGroup
 }
 
+// @title Greenlight Public API
+// @version 1.0
+// @description This is public API for movies management
+// @termsOfService https://github.com/minhnghia2k3/
+
+// @contact.name API Support
+// @contact.url https://github.com/minhnghia2k3
+// @contact.email brozennvn@gmail.com
+
+// @license.name Apache 2.0
+// @license.url https://www.apache.org/licenses/LICENSE-2.0
+
+// @host localhost:4000
+// @BasePath /v1
 func main() {
 	var cfg config
 

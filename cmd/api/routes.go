@@ -3,6 +3,7 @@ package main
 import (
 	"expvar"
 	"github.com/julienschmidt/httprouter"
+	"github.com/swaggo/http-swagger"
 	"net/http"
 )
 
@@ -28,6 +29,11 @@ func (app *application) routes() http.Handler {
 
 	// Metric
 	router.Handler(http.MethodGet, "/debug/vars", expvar.Handler())
+
+	// Documenting
+	router.Handler(http.MethodGet, "/swagger/*docs", httpSwagger.Handler(
+		httpSwagger.URL("http://localhost:4000/swagger/doc.json"),
+	))
 
 	// Wrap the router with the panic recovery middleware
 	return app.metrics(app.recoverPanic(app.enableCORS(app.rateLimit(app.authenticate(router)))))

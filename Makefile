@@ -73,11 +73,27 @@ vendor:
 	go mod vendor
 
 # ==================================================================================== #
+# DOCUMENTATION
+# ==================================================================================== #
+swag:
+	@echo 'Documenting cmd/api...'
+	swag init -g cmd/api/main.go
+
+# ==================================================================================== #
 # BUILD
 # ==================================================================================== #
-build:
+build: audit
 	@echo 'Building cmd/api...'
-	go build -ldflags='-s' -o=./bin/api ./cmd/api # Local machine
-	GOOS=linux GOARCH=amd64 go build -ldflags='-s' -o=./bin/linux_amd64/api ./cmd/api # Ubuntu Linux server
+	go build -ldflags '-s -w' -o ./bin/api ./cmd/api
+	GOOS=linux GOARCH=amd64 go build -ldflags='-s -w' -o=./bin/linux_amd64/api ./cmd/api
+
+# ==================================================================================== #
+# PRODUCTION
+# ==================================================================================== #
+exec:
+	@echo 'Executing binary cmd/api...'
+	./bin/api -db-dsn=${GREENLIGHT_DB_DSN}
+
+
 
 PHONY: run healthcheck help confirm psql migrate.create migrate.up migrate.down docker.start docker.stop vendor build

@@ -4,8 +4,25 @@ import (
 	"net/http"
 )
 
+type SystemInformation struct {
+	Environment string `json:"environment"`
+	Version     string `json:"version"`
+}
+
+type Status struct {
+	Available         string            `json:"status"`
+	SystemInformation SystemInformation `json:"system_information"`
+}
+
 // healthcheckHandler handler which writes a plain-text response
 // with information about the application status, operating environment and version.
+// @Summary      Show server information
+// @Description  show server status and information
+// @Tags         Server
+// @Produce      json
+// @Success      200  {object} Status
+// @Failure      500  {object} Error
+// @Router       /healthcheck [get]
 func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
 	data := envelop{
 		"status": "available",
