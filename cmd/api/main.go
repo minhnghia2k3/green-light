@@ -14,6 +14,7 @@ import (
 	"github.com/minhnghia2k3/greenlight/internal/vcs"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -77,7 +78,12 @@ func main() {
 	var cfg config
 
 	// Read command-line flags
-	flag.IntVar(&cfg.port, "port", 4000, "API server port")
+	port := os.Getenv("PORT")
+	intPort, err := strconv.Atoi(port)
+	if err != nil {
+		intPort = 4000
+	}
+	flag.IntVar(&cfg.port, "port", intPort, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("DATABASE_URL"), "PostgreSQL DSN")
