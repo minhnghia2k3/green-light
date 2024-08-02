@@ -24,7 +24,7 @@ func BenchmarkWriteJSON(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		rr := httptest.NewRecorder()
 
-		err := app.writeJSON(rr, http.StatusOK, movie, nil)
+		err := app.writeJSON(rr, http.StatusOK, envelop{"movie": movie}, nil)
 		if err != nil {
 			b.Fatal(err)
 		}

@@ -70,7 +70,7 @@ func (p *password) Matches(plainTextPassword string) (bool, error) {
 
 func ValidateEmail(v *validation.Validator, email string) {
 	v.Check(email != "", "email", "must be provided")
-	v.Check(validation.Matches(email, validation.EmailRx), "email", "must be a valid email address")
+	v.Check(validation.Matches(email, validation.EmailRX), "email", "must be a valid email address")
 }
 
 func ValidatePasswordPlaintext(v *validation.Validator, password string) {

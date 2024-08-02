@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/minhnghia2k3/greenlight/internal/data"
 	"github.com/minhnghia2k3/greenlight/internal/validation"
+	"github.com/tomasen/realip"
 	"golang.org/x/time/rate"
-	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -54,7 +54,6 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 
 			// Lock the mutex to prevent any rate limiter checks
 			mu.Lock()
-			defer mu.Unlock()
 			// Loop through all clients. If they haven't been seen last three minutes
 			// delete the corresponding entry from the map
 			for ip, client := range clients {
@@ -62,22 +61,17 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 					delete(clients, ip)
 				}
 			}
-
+			mu.Unlock()
 		}
 	}()
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if app.config.limiter.enabled {
-			// Extract the client's IP
-			ip, _, err := net.SplitHostPort(r.RemoteAddr)
-			if err != nil {
-				app.serverErrorResponse(w, r, err)
-				return
-			}
+			// Use the realip.FromRequest() function to get the client's real IP address.
+			ip := realip.FromRequest(r)
 
 			// Lock the mutex to prevent executed concurrently
 			mu.Lock()
-			defer mu.Unlock()
 
 			// Check if the IP address already exists in the map
 			if _, exist := clients[ip]; !exist {
@@ -91,6 +85,8 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 				app.rateLimitExceededResponse(w, r)
 				return
 			}
+
+			mu.Unlock()
 		}
 		next.ServeHTTP(w, r)
 	})
@@ -168,7 +164,7 @@ func (app *application) requireActivatedUser(next http.HandlerFunc) http.Handler
 		user := app.contextGetUser(r)
 
 		// If the user not activated, return 403 error
-		if user.Activated == false {
+		if !user.Activated {
 			app.inactiveAccountResponse(w, r)
 			return
 		}

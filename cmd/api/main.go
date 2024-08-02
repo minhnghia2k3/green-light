@@ -5,10 +5,12 @@ import (
 	"database/sql"
 	"expvar"
 	"flag"
+	"fmt"
 	_ "github.com/lib/pq"
 	"github.com/minhnghia2k3/greenlight/internal/data"
 	"github.com/minhnghia2k3/greenlight/internal/jsonlog"
 	"github.com/minhnghia2k3/greenlight/internal/mailer"
+	"github.com/minhnghia2k3/greenlight/internal/vcs"
 	"os"
 	"runtime"
 	"strings"
@@ -17,7 +19,9 @@ import (
 )
 
 // Application version number
-const version = "1.0.0"
+var (
+	version = vcs.Version()
+)
 
 type config struct {
 	port int
@@ -61,7 +65,8 @@ func main() {
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 
-	flag.StringVar(&cfg.db.dsn, "db-dsn", "postgres://root:secret@localhost:5432/greenlight?sslmode=disable", "PostgreSQL DSN")
+	os.Setenv("GREENLIGHT_DB_DSN", "postgres://root:secret@localhost:5432/greenlight?sslmode=disable")
+	flag.StringVar(&cfg.db.dsn, "db-dsn", "", "PostgreSQL DSN")
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max connection idle time")
@@ -81,7 +86,14 @@ func main() {
 		return nil
 	})
 
+	displayVersion := flag.Bool("version", false, "Display version and exit")
+
 	flag.Parse()
+
+	if *displayVersion {
+		fmt.Printf("Version:\t%s\n", version)
+		os.Exit(0)
+	}
 
 	// creates a new Logger which writes to the std out stream
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
