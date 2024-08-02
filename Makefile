@@ -35,7 +35,7 @@ migrate.create:
 
 # DSN: postgres://root:secret@localhost:5432/greenlight?sslmode=disable
 ## migrate.up: apply all up database migrations
-migrate.up: confirm
+migrate.up:
 	@echo 'Running up migrations...'
 	migrate -path=./migrations -database=${GREENLIGHT_DB_DSN} up
 
@@ -65,7 +65,7 @@ audit: vendor
 	go test -race -vet=off ./...
 
 ## vendor: tidy and vendor dependencies
-vendor:
+go/vendor:
 	@echo 'Tidying and verifying module dependencies...'
 	go mod tidy
 	go mod verify

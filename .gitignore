@@ -1,4 +1,4 @@
 .env
 bin/
-vendor/
+#vendor/
 .idea
