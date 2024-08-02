@@ -4,12 +4,19 @@
 
 # Greenlight
 
-Greenlight is a **Go application** offers a **reliable, fast, and secure** API for performing **CRUD operations** on movies, featuring
-**authentication** and **permission-based authorization**.
-It includes advanced functionalities such as **filtering, sorting, and pagination** for movie lists, concurrency control
-using **Context**, comprehensive **logging and error handling**, **IP-based rate limiting**,
-**graceful application shutdown**, **background email sending**, **metrics collection**, and support for building,
-versioning, and quality control.
+Greenlight is a **Go application** offers a **reliable, fast, and secure** API for movies management.
+
+## Key features 🔑
+- Seamlessly perform **CRUD** operations on movie data
+- Robust **authentication** and permission-based **authorization**
+- Enhanced movie list management with **filtering**, **sorting**, and **pagination**
+- Efficient concurrency control leveraging **Context**, **Goroutines**, **Defer**, and **Channels**
+- Enable background email sending
+- Comprehensive **logging** and **error handling**
+- Implement IP-based **rate limiting** for security
+- Ensure **graceful application shutdown** and efficient **metrics** collection
+- Support for building, versioning, and quality control for continuous improvement
+- Public API using **Swagger**
 
 ## Diagrams
 
