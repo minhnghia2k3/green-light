@@ -1,1 +1,1 @@
-web: make build && ./bin/api
+web: ./bin/api
