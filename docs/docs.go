@@ -422,13 +422,6 @@ const docTemplate = `{
                 "summary": "Register account",
                 "parameters": [
                     {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
-                        "in": "query",
-                        "required": true
-                    },
-                    {
                         "description": "register user input",
                         "name": "input",
                         "in": "body",

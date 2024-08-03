@@ -393,11 +393,6 @@ paths:
       - application/json
       description: register user account
       parameters:
-      - description: id
-        in: query
-        name: id
-        required: true
-        type: integer
       - description: register user input
         in: body
         name: input
