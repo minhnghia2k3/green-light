@@ -6,12 +6,14 @@ import (
 	"expvar"
 	"flag"
 	"fmt"
+	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	_ "github.com/minhnghia2k3/greenlight/docs"
 	"github.com/minhnghia2k3/greenlight/internal/data"
 	"github.com/minhnghia2k3/greenlight/internal/jsonlog"
 	"github.com/minhnghia2k3/greenlight/internal/mailer"
 	"github.com/minhnghia2k3/greenlight/internal/vcs"
+	"log"
 	"os"
 	"runtime"
 	"strconv"
@@ -78,6 +80,11 @@ func main() {
 	var cfg config
 
 	// Read command-line flags
+	err := godotenv.Load()
+	if err != nil {
+		log.Print("Error loading .env file")
+	}
+
 	port := os.Getenv("PORT")
 	intPort, err := strconv.Atoi(port)
 	if err != nil {
@@ -115,7 +122,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	// creates a new Logger which writes to the std out stream
+	// Creates a new Logger which writes to the std out stream
 	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
 
 	// Create a connection pool

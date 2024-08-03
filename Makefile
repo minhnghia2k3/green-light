@@ -4,7 +4,6 @@ include .env
 # HELPERS
 # ==================================================================================== #
 
-
 help:
 	@echo 'Usage:'
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' | sed -e 's/^/ /'
@@ -18,7 +17,7 @@ confirm:
 
 ## run: run the cmd/api application
 run:
-	go run ./cmd/api -db-dsn=${GREENLIGHT_DB_DSN} -smtp-username=${SMTP_USERNAME} -smtp-password=${SMTP_PASSWORD} -smtp-sender=${SMTP_SENDER}
+	go run ./cmd/api
 
 ## healthcheck: perform GET to api /v1/healthcheck
 healthcheck:
@@ -26,7 +25,7 @@ healthcheck:
 
 # for local postgresql
 psql:
-	psql ${GREENLIGHT_DB_DSN}
+	psql ${DATABASE_URL}
 
 ## migrate.create: create a new database migration
 migrate.create:
@@ -37,11 +36,11 @@ migrate.create:
 ## migrate.up: apply all up database migrations
 migrate.up:
 	@echo 'Running up migrations...'
-	migrate -path=./migrations -database=${GREENLIGHT_DB_DSN} up
+	migrate -path=./migrations -database=${DATABASE_URL} up
 
 ## migrate.down: apply down single sequence of migration at a time
 migrate.down: confirm
-	migrate -path=./migrations -database=${GREENLIGHT_DB_DSN} down 1
+	migrate -path=./migrations -database=${DATABASE_URL} down 1
 
 ## docker.start: start a specific docker container
 docker.start:
@@ -55,7 +54,7 @@ docker.stop:
 # QUALITY CONTROL
 # ==================================================================================== #
 
-audit: vendor
+audit: go/vendor
 	@echo 'Formatting th code...'
 	go fmt ./...
 	@echo 'Vetting code...'
@@ -92,8 +91,8 @@ build: audit
 # ==================================================================================== #
 exec:
 	@echo 'Executing binary cmd/api...'
-	./bin/api -db-dsn=${GREENLIGHT_DB_DSN}
+	./bin/api -db-dsn=${DATABASE_URL}
 
 
 
-PHONY: run healthcheck help confirm psql migrate.create migrate.up migrate.down docker.start docker.stop vendor build
+PHONY: run healthcheck help confirm psql migrate.create migrate.up migrate.down docker.start docker.stop go/vendor build
