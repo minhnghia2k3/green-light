@@ -1,20 +1,30 @@
-# Use a valid golang image as the builder
-FROM golang:1.22.5-alpine3.19 as builder
+# Use the official Golang image as the base image
+FROM golang:1.22.5-alpine3.19
 
-# Install necessary tools
-RUN apk add --no-cache curl tar
+# Install dependencies
+RUN apk add --no-cache git
 
 # Install golang-migrate
-RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.14.1/migrate.linux-amd64.tar.gz | tar xvz && \
-    mv migrate $(go env GOPATH)/bin/migrate
+RUN wget -O /usr/local/bin/migrate https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64 \
+    && chmod +x /usr/local/bin/migrate
 
+# Set the Current Working Directory inside the container
 WORKDIR /app
+
+# Copy the Go Modules manifests
+COPY go.mod go.sum ./
+
+# Download Go modules
+RUN go mod download
+
+# Copy the source code into the container
 COPY . .
 
-RUN go build -o /bin/api ./cmd/api
+# Build the Go app
+RUN go build -ldflags '-s -w' -o ./bin/api ./cmd/api
 
-FROM gcr.io/distroless/base-debian10
-COPY --from=builder /bin/api /bin/api
-COPY --from=builder /usr/local/bin/migrate /usr/local/bin/migrate
+# Command to run the migrations and start the app
+CMD ["sh", "-c", "migrate -path=./migrations -database=${DATABASE_URL} up && ./bin/api"]
 
-CMD ["/bin/api"]
+# Expose port (change if your app listens on a different port)
+EXPOSE 4000
