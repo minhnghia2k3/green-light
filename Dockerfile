@@ -5,7 +5,7 @@ FROM golang:1.22.5-alpine3.19
 RUN apk add --no-cache git
 
 # Install golang-migrate
-RUN wget -O /usr/local/bin/migrate https://github.com/golang-migrate/migrate/releases/download/v4.15.2/migrate.linux-amd64 \
+RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.14.1/migrate.linux-amd64.tar.gz | tar xvz -C /usr/local/bin \
     && chmod +x /usr/local/bin/migrate
 
 # Set the Current Working Directory inside the container
