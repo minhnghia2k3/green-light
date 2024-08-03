@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
+	"github.com/minhnghia2k3/greenlight/docs"
 	_ "github.com/minhnghia2k3/greenlight/docs"
 	"github.com/minhnghia2k3/greenlight/internal/data"
 	"github.com/minhnghia2k3/greenlight/internal/jsonlog"
@@ -74,17 +75,17 @@ type application struct {
 // @license.name Apache 2.0
 // @license.url https://www.apache.org/licenses/LICENSE-2.0
 
-// @host localhost:4000
 // @BasePath /v1
 func main() {
 	var cfg config
-
-	// Read command-line flags
 	err := godotenv.Load()
 	if err != nil {
 		log.Print("Error loading .env file")
 	}
 
+	docs.SwaggerInfo.Host = os.Getenv("HOST")
+
+	// Read command-line flags
 	port := os.Getenv("PORT")
 	intPort, err := strconv.Atoi(port)
 	if err != nil {
