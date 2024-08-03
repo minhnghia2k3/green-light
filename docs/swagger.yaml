@@ -53,6 +53,21 @@ definitions:
       error:
         type: string
     type: object
+  main.Input:
+    properties:
+      genres:
+        description: Don't need to set to a pointer, bc slices already heave zero-values
+          nil
+        items:
+          type: string
+        type: array
+      runtime:
+        type: integer
+      title:
+        type: string
+      year:
+        type: integer
+    type: object
   main.ListMovies:
     properties:
       data:
@@ -60,10 +75,28 @@ definitions:
       metadata:
         $ref: '#/definitions/data.Metadata'
     type: object
+  main.LoginInput:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+      password:
+        example: myP4SSw3rd
+        type: string
+    type: object
   main.MovieResponse:
     properties:
       movie:
         $ref: '#/definitions/data.Movie'
+    type: object
+  main.RegisterUserInput:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
     type: object
   main.Status:
     properties:
@@ -77,6 +110,16 @@ definitions:
       environment:
         type: string
       version:
+        type: string
+    type: object
+  main.TokenInput:
+    properties:
+      token:
+        type: string
+    type: object
+  main.TokenResponse:
+    properties:
+      authentication_token:
         type: string
     type: object
   main.UserResponse:
@@ -119,6 +162,18 @@ paths:
       consumes:
       - application/json
       description: delete a movie record
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: update movie input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.Input'
       produces:
       - application/json
       responses:
@@ -134,6 +189,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/main.Error'
+      security:
+      - Bearer: []
       summary: Delete movie
       tags:
       - Movies
@@ -141,6 +198,27 @@ paths:
       consumes:
       - application/json
       description: show list movies, page = 1, page_size=10 by default.
+      parameters:
+      - description: page
+        in: query
+        name: page
+        type: integer
+      - description: page_size
+        in: query
+        name: page_size
+        type: integer
+      - description: title
+        in: query
+        name: title
+        type: string
+      - description: genres
+        in: query
+        name: genres
+        type: string
+      - description: sort
+        in: query
+        name: sort
+        type: string
       produces:
       - application/json
       responses:
@@ -152,6 +230,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/main.Error'
+      security:
+      - Bearer: []
       summary: List movies
       tags:
       - Movies
@@ -159,6 +239,29 @@ paths:
       consumes:
       - application/json
       description: update an existing movie record
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - collectionFormat: csv
+        description: Don't need to set to a pointer, bc slices already heave zero-values
+          nil
+        in: query
+        items:
+          type: string
+        name: genres
+        type: array
+      - in: query
+        name: runtime
+        type: integer
+      - in: query
+        name: title
+        type: string
+      - in: query
+        name: year
+        type: integer
       produces:
       - application/json
       responses:
@@ -182,6 +285,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/main.Error'
+      security:
+      - Bearer: []
       summary: Update movie
       tags:
       - Movies
@@ -208,6 +313,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/main.Error'
+      security:
+      - Bearer: []
       summary: Create movie
       tags:
       - Movies
@@ -216,6 +323,12 @@ paths:
       consumes:
       - application/json
       description: get movie by provided movie id
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -231,6 +344,8 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/main.Error'
+      security:
+      - Bearer: []
       summary: Get movie by id
       tags:
       - Movies
@@ -239,13 +354,20 @@ paths:
       consumes:
       - application/json
       description: login account by email and password
+      parameters:
+      - description: Login parameters
+        in: body
+        name: loginInput
+        required: true
+        schema:
+          $ref: '#/definitions/main.LoginInput'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/main.UserResponse'
+            $ref: '#/definitions/main.TokenResponse'
         "400":
           description: Bad Request
           schema:
@@ -270,6 +392,18 @@ paths:
       consumes:
       - application/json
       description: register user account
+      parameters:
+      - description: id
+        in: query
+        name: id
+        required: true
+        type: integer
+      - description: register user input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.RegisterUserInput'
       produces:
       - application/json
       responses:
@@ -297,6 +431,13 @@ paths:
       consumes:
       - application/json
       description: activate user account
+      parameters:
+      - description: plain text token input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.TokenInput'
       produces:
       - application/json
       responses:
@@ -323,4 +464,10 @@ paths:
       summary: Activate user account
       tags:
       - Users
+securityDefinitions:
+  Bearer:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

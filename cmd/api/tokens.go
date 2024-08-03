@@ -8,12 +8,22 @@ import (
 	"time"
 )
 
+type LoginInput struct {
+	Email    string `json:"email" example:"john@example.com"`
+	Password string `json:"password" example:"myP4SSw3rd"`
+}
+
+type TokenResponse struct {
+	AuthenticationToken string `json:"authentication_token"`
+}
+
 // @Summary      Create authentication token
 // @Description  login account by email and password
 // @Tags         Authentications
 // @Accept 		 json
 // @Produce      json
-// @Success      201  {object} UserResponse
+// @Param		 loginInput 	body 	LoginInput	true	"Login parameters"
+// @Success      201  {object} TokenResponse
 // @Failure      400  {object} Error
 // @Failure      401  {object} Error
 // @Failure      422  {object} Error
@@ -21,10 +31,7 @@ import (
 // @Router       /tokens/authentication [post]
 func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse the email and password from the request body.
-	var input struct {
-		Email    string `json:"email"`
-		Password string `json:"password"`
-	}
+	var input LoginInput
 
 	err := app.readJSON(w, r, &input)
 	if err != nil {

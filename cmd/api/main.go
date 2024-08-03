@@ -75,6 +75,11 @@ type application struct {
 // @license.name Apache 2.0
 // @license.url https://www.apache.org/licenses/LICENSE-2.0
 
+// @securityDefinitions.apikey Bearer
+// @in header
+// @name Authorization
+// @description Type "Bearer" followed by a space and JWT token.
+
 // @BasePath /v1
 func main() {
 	var cfg config

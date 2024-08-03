@@ -13,9 +13,21 @@ type UserResponse struct {
 	User data.User `json:"user"`
 }
 
+type RegisterUserInput struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type TokenInput struct {
+	TokenPlainText string `json:"token"`
+}
+
 // registerUserHandler function handle register a new user, and sending email in the background.
 // @Summary      Register account
 // @Description  register user account
+// @Param id query int true "id"
+// @Param   input      body RegisterUserInput true "register user input"
 // @Tags         Users
 // @Accept 		 json
 // @Produce      json
@@ -25,11 +37,7 @@ type UserResponse struct {
 // @Failure      500  {object} Error
 // @Router       /users [post]
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
-	var input struct {
-		Name     string
-		Email    string
-		Password string
-	}
+	var input RegisterUserInput
 
 	// Parse the request body
 	err := app.readJSON(w, r, &input)
@@ -111,6 +119,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 
 // @Summary      Activate user account
 // @Description  activate user account
+// @Param   input      body TokenInput true "plain text token input"
 // @Tags         Users
 // @Accept 		 json
 // @Produce      json
@@ -122,9 +131,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 // @Router       /users/activated [put]
 func (app *application) activeUserHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse input data
-	var input struct {
-		TokenPlainText string `json:"token"`
-	}
+	var input TokenInput
 
 	err := app.readJSON(w, r, &input)
 	if err != nil {

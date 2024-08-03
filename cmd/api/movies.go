@@ -29,6 +29,7 @@ type MovieResponse struct {
 // @Tags         Movies
 // @Accept 		 json
 // @Produce      json
+// @Security Bearer
 // @Success      201  {object} MovieResponse
 // @Failure      400  {object} Error
 // @Failure      422  {object} Error
@@ -80,6 +81,12 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 // It will get the URL query, query integer parameters, and response list of movies to client.
 // @Summary      List movies
 // @Description  show list movies, page = 1, page_size=10 by default.
+// @Param page query int false "page"
+// @Param page_size query int false "page_size"
+// @Param title query string false "title"
+// @Param genres query string false "genres"
+// @Param sort query string false "sort"
+// @Security Bearer
 // @Tags         Movies
 // @Accept 		 json
 // @Produce      json
@@ -123,9 +130,11 @@ func (app *application) listMoviesHandler(w http.ResponseWriter, r *http.Request
 // showMovieHandler handler
 // @Summary      Get movie by id
 // @Description  get movie by provided movie id
+// @Param id path int true "id"
 // @Tags         Movies
 // @Accept 		 json
 // @Produce      json
+// @Security Bearer
 // @Success      200  {object} ListMovies
 // @Failure      404  {object} Error
 // @Failure      500  {object} Error
@@ -158,6 +167,9 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 // updateMovieHandler which query to get a movie by parameter id and update with input variables.
 // @Summary      Update movie
 // @Description  update an existing movie record
+// @Param id path int true "id"
+// @Param input query Input true "update movie input"
+// @Security Bearer
 // @Tags         Movies
 // @Accept 		 json
 // @Produce      json
@@ -239,6 +251,9 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 
 // @Summary      Delete movie
 // @Description  delete a movie record
+// @Param id path int true "id"
+// @Param   input      body Input true  "update movie input"
+// @Security Bearer
 // @Tags         Movies
 // @Accept 		 json
 // @Produce      json

@@ -52,6 +52,11 @@ const docTemplate = `{
         },
         "/movies": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "show list movies, page = 1, page_size=10 by default.",
                 "consumes": [
                     "application/json"
@@ -63,6 +68,38 @@ const docTemplate = `{
                     "Movies"
                 ],
                 "summary": "List movies",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page_size",
+                        "name": "page_size",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "title",
+                        "name": "title",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "genres",
+                        "name": "genres",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "sort",
+                        "name": "sort",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -79,6 +116,11 @@ const docTemplate = `{
                 }
             },
             "post": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "handlers receives Input, validate it then create a new movie record",
                 "consumes": [
                     "application/json"
@@ -118,6 +160,11 @@ const docTemplate = `{
                 }
             },
             "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "delete a movie record",
                 "consumes": [
                     "application/json"
@@ -129,6 +176,24 @@ const docTemplate = `{
                     "Movies"
                 ],
                 "summary": "Delete movie",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "update movie input",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.Input"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -151,6 +216,11 @@ const docTemplate = `{
                 }
             },
             "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "update an existing movie record",
                 "consumes": [
                     "application/json"
@@ -162,6 +232,40 @@ const docTemplate = `{
                     "Movies"
                 ],
                 "summary": "Update movie",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "collectionFormat": "csv",
+                        "description": "Don't need to set to a pointer, bc slices already heave zero-values nil",
+                        "name": "genres",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "runtime",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "name": "title",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "year",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -198,6 +302,11 @@ const docTemplate = `{
         },
         "/movies/{id}": {
             "get": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
                 "description": "get movie by provided movie id",
                 "consumes": [
                     "application/json"
@@ -209,6 +318,15 @@ const docTemplate = `{
                     "Movies"
                 ],
                 "summary": "Get movie by id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -244,11 +362,22 @@ const docTemplate = `{
                     "Authentications"
                 ],
                 "summary": "Create authentication token",
+                "parameters": [
+                    {
+                        "description": "Login parameters",
+                        "name": "loginInput",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.LoginInput"
+                        }
+                    }
+                ],
                 "responses": {
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/main.UserResponse"
+                            "$ref": "#/definitions/main.TokenResponse"
                         }
                     },
                     "400": {
@@ -291,6 +420,24 @@ const docTemplate = `{
                     "Users"
                 ],
                 "summary": "Register account",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "query",
+                        "required": true
+                    },
+                    {
+                        "description": "register user input",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.RegisterUserInput"
+                        }
+                    }
+                ],
                 "responses": {
                     "201": {
                         "description": "Created",
@@ -332,6 +479,17 @@ const docTemplate = `{
                     "Users"
                 ],
                 "summary": "Activate user account",
+                "parameters": [
+                    {
+                        "description": "plain text token input",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.TokenInput"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -449,6 +607,27 @@ const docTemplate = `{
                 }
             }
         },
+        "main.Input": {
+            "type": "object",
+            "properties": {
+                "genres": {
+                    "description": "Don't need to set to a pointer, bc slices already heave zero-values nil",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "runtime": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                },
+                "year": {
+                    "type": "integer"
+                }
+            }
+        },
         "main.ListMovies": {
             "type": "object",
             "properties": {
@@ -460,11 +639,38 @@ const docTemplate = `{
                 }
             }
         },
+        "main.LoginInput": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "john@example.com"
+                },
+                "password": {
+                    "type": "string",
+                    "example": "myP4SSw3rd"
+                }
+            }
+        },
         "main.MovieResponse": {
             "type": "object",
             "properties": {
                 "movie": {
                     "$ref": "#/definitions/data.Movie"
+                }
+            }
+        },
+        "main.RegisterUserInput": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
                 }
             }
         },
@@ -490,6 +696,22 @@ const docTemplate = `{
                 }
             }
         },
+        "main.TokenInput": {
+            "type": "object",
+            "properties": {
+                "token": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.TokenResponse": {
+            "type": "object",
+            "properties": {
+                "authentication_token": {
+                    "type": "string"
+                }
+            }
+        },
         "main.UserResponse": {
             "type": "object",
             "properties": {
@@ -497,6 +719,14 @@ const docTemplate = `{
                     "$ref": "#/definitions/data.User"
                 }
             }
+        }
+    },
+    "securityDefinitions": {
+        "Bearer": {
+            "description": "Type \"Bearer\" followed by a space and JWT token.",
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header"
         }
     }
 }`
