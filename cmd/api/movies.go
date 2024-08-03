@@ -15,6 +15,25 @@ type Input struct {
 	Genres  []string      `json:"genres"` // Don't need to set to a pointer, bc slices already heave zero-values nil
 }
 
+type ListMovies struct {
+	Data     data.Movie    `json:"data"`
+	Metadata data.Metadata `json:"metadata"`
+}
+
+type MovieResponse struct {
+	Movie data.Movie `json:"movie"`
+}
+
+// @Summary      Create movie
+// @Description  handlers receives Input, validate it then create a new movie record
+// @Tags         Movies
+// @Accept 		 json
+// @Produce      json
+// @Success      201  {object} MovieResponse
+// @Failure      400  {object} Error
+// @Failure      422  {object} Error
+// @Failure      500  {object} Error
+// @Router       /movies [post]
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
 	var input Input
 
@@ -59,6 +78,14 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 
 // The listMoviesHandler GET list of movies, query by `input` struct
 // It will get the URL query, query integer parameters, and response list of movies to client.
+// @Summary      List movies
+// @Description  show list movies, page = 1, page_size=10 by default.
+// @Tags         Movies
+// @Accept 		 json
+// @Produce      json
+// @Success      200  {object} ListMovies
+// @Failure      500  {object} Error
+// @Router       /movies [get]
 func (app *application) listMoviesHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Title  string
@@ -94,6 +121,15 @@ func (app *application) listMoviesHandler(w http.ResponseWriter, r *http.Request
 }
 
 // showMovieHandler handler
+// @Summary      Get movie by id
+// @Description  get movie by provided movie id
+// @Tags         Movies
+// @Accept 		 json
+// @Produce      json
+// @Success      200  {object} ListMovies
+// @Failure      404  {object} Error
+// @Failure      500  {object} Error
+// @Router       /movies/{id} [get]
 func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIdParam(r)
 	if err != nil {
@@ -120,6 +156,17 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 }
 
 // updateMovieHandler which query to get a movie by parameter id and update with input variables.
+// @Summary      Update movie
+// @Description  update an existing movie record
+// @Tags         Movies
+// @Accept 		 json
+// @Produce      json
+// @Success      200  {object} MovieResponse
+// @Failure      400  {object} Error
+// @Failure      404  {object} Error
+// @Failure      422  {object} Error
+// @Failure      500  {object} Error
+// @Router       /movies [patch]
 func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIdParam(r)
 	if err != nil {
@@ -190,6 +237,15 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// @Summary      Delete movie
+// @Description  delete a movie record
+// @Tags         Movies
+// @Accept 		 json
+// @Produce      json
+// @Success      200  {object} MovieResponse
+// @Failure      404  {object} Error
+// @Failure      500  {object} Error
+// @Router       /movies [delete]
 func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIdParam(r)
 	if err != nil {

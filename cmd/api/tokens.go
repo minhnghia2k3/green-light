@@ -8,6 +8,17 @@ import (
 	"time"
 )
 
+// @Summary      Create authentication token
+// @Description  login account by email and password
+// @Tags         Authentications
+// @Accept 		 json
+// @Produce      json
+// @Success      201  {object} UserResponse
+// @Failure      400  {object} Error
+// @Failure      401  {object} Error
+// @Failure      422  {object} Error
+// @Failure      500  {object} Error
+// @Router       /tokens/authentication [post]
 func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse the email and password from the request body.
 	var input struct {

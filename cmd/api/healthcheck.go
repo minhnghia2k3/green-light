@@ -14,8 +14,6 @@ type Status struct {
 	SystemInformation SystemInformation `json:"system_information"`
 }
 
-// healthcheckHandler handler which writes a plain-text response
-// with information about the application status, operating environment and version.
 // @Summary      Show server information
 // @Description  show server status and information
 // @Tags         Server

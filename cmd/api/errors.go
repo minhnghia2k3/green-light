@@ -7,7 +7,7 @@ import (
 )
 
 type Error struct {
-	Error any `json:"error"`
+	Error string `json:"error"`
 }
 
 // The logError() method is a generic helper for logging an error message.

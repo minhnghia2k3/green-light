@@ -9,7 +9,21 @@ import (
 	"time"
 )
 
+type UserResponse struct {
+	User data.User `json:"user"`
+}
+
 // registerUserHandler function handle register a new user, and sending email in the background.
+// @Summary      Register account
+// @Description  register user account
+// @Tags         Users
+// @Accept 		 json
+// @Produce      json
+// @Success      201  {object} UserResponse
+// @Failure      400  {object} Error
+// @Failure      422  {object} Error
+// @Failure      500  {object} Error
+// @Router       /users [post]
 func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
 		Name     string
@@ -95,6 +109,17 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 	}
 }
 
+// @Summary      Activate user account
+// @Description  activate user account
+// @Tags         Users
+// @Accept 		 json
+// @Produce      json
+// @Success      200  {object} UserResponse
+// @Failure      400  {object} Error
+// @Failure      401  {object} Error
+// @Failure      422  {object} Error
+// @Failure      500  {object} Error
+// @Router       /users/activated [put]
 func (app *application) activeUserHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse input data
 	var input struct {

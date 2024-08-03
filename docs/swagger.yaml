@@ -1,8 +1,69 @@
 basePath: /v1
 definitions:
+  data.Metadata:
+    properties:
+      current_page:
+        type: integer
+      first_page:
+        type: integer
+      last_page:
+        type: integer
+      page_size:
+        type: integer
+      total_records:
+        type: integer
+    type: object
+  data.Movie:
+    properties:
+      created_at:
+        type: string
+      genres:
+        items:
+          type: string
+        type: array
+      id:
+        type: integer
+      runtime:
+        description: <- Custom Runtime `type`
+        type: integer
+      title:
+        type: string
+      version:
+        type: integer
+      year:
+        type: integer
+    type: object
+  data.User:
+    properties:
+      activated:
+        type: boolean
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      version:
+        type: integer
+    type: object
   main.Error:
     properties:
-      error: {}
+      error:
+        type: string
+    type: object
+  main.ListMovies:
+    properties:
+      data:
+        $ref: '#/definitions/data.Movie'
+      metadata:
+        $ref: '#/definitions/data.Metadata'
+    type: object
+  main.MovieResponse:
+    properties:
+      movie:
+        $ref: '#/definitions/data.Movie'
     type: object
   main.Status:
     properties:
@@ -18,10 +79,14 @@ definitions:
       version:
         type: string
     type: object
-host: localhost:4000
+  main.UserResponse:
+    properties:
+      user:
+        $ref: '#/definitions/data.User'
+    type: object
 info:
   contact:
-    email: support@swagger.io
+    email: brozennvn@gmail.com
     name: API Support
     url: https://github.com/minhnghia2k3
   description: This is public API for movies management
@@ -49,4 +114,213 @@ paths:
       summary: Show server information
       tags:
       - Server
+  /movies:
+    delete:
+      consumes:
+      - application/json
+      description: delete a movie record
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MovieResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Delete movie
+      tags:
+      - Movies
+    get:
+      consumes:
+      - application/json
+      description: show list movies, page = 1, page_size=10 by default.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.ListMovies'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: List movies
+      tags:
+      - Movies
+    patch:
+      consumes:
+      - application/json
+      description: update an existing movie record
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MovieResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/main.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Update movie
+      tags:
+      - Movies
+    post:
+      consumes:
+      - application/json
+      description: handlers receives Input, validate it then create a new movie record
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.MovieResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/main.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Create movie
+      tags:
+      - Movies
+  /movies/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get movie by provided movie id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.ListMovies'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Get movie by id
+      tags:
+      - Movies
+  /tokens/authentication:
+    post:
+      consumes:
+      - application/json
+      description: login account by email and password
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/main.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Create authentication token
+      tags:
+      - Authentications
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: register user account
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/main.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/main.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Register account
+      tags:
+      - Users
+  /users/activated:
+    put:
+      consumes:
+      - application/json
+      description: activate user account
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.Error'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/main.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Activate user account
+      tags:
+      - Users
 swagger: "2.0"
