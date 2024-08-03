@@ -22,7 +22,7 @@ type TokenResponse struct {
 // @Tags         Authentications
 // @Accept 		 json
 // @Produce      json
-// @Param		 loginInput 	body 	LoginInput	true	"Login parameters"
+// @Param		 input 	body 	LoginInput	true	"Login parameters"
 // @Success      201  {object} TokenResponse
 // @Failure      400  {object} Error
 // @Failure      401  {object} Error

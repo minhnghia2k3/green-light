@@ -53,21 +53,6 @@ definitions:
       error:
         type: string
     type: object
-  main.Input:
-    properties:
-      genres:
-        description: Don't need to set to a pointer, bc slices already heave zero-values
-          nil
-        items:
-          type: string
-        type: array
-      runtime:
-        type: integer
-      title:
-        type: string
-      year:
-        type: integer
-    type: object
   main.ListMovies:
     properties:
       data:
@@ -83,6 +68,27 @@ definitions:
       password:
         example: myP4SSw3rd
         type: string
+    type: object
+  main.MovieInputDocs:
+    properties:
+      genres:
+        description: Don't need to set to a pointer, bc slices already heave zero-values
+          nil
+        example:
+        - actions
+        - sci-fi
+        items:
+          type: string
+        type: array
+      runtime:
+        example: 195 mins
+        type: string
+      title:
+        example: Black panther
+        type: string
+      year:
+        example: 2018
+        type: integer
     type: object
   main.MovieResponse:
     properties:
@@ -158,42 +164,6 @@ paths:
       tags:
       - Server
   /movies:
-    delete:
-      consumes:
-      - application/json
-      description: delete a movie record
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: update movie input
-        in: body
-        name: input
-        required: true
-        schema:
-          $ref: '#/definitions/main.Input'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/main.MovieResponse'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/main.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/main.Error'
-      security:
-      - Bearer: []
-      summary: Delete movie
-      tags:
-      - Movies
     get:
       consumes:
       - application/json
@@ -235,65 +205,18 @@ paths:
       summary: List movies
       tags:
       - Movies
-    patch:
-      consumes:
-      - application/json
-      description: update an existing movie record
-      parameters:
-      - description: id
-        in: path
-        name: id
-        required: true
-        type: integer
-      - collectionFormat: csv
-        description: Don't need to set to a pointer, bc slices already heave zero-values
-          nil
-        in: query
-        items:
-          type: string
-        name: genres
-        type: array
-      - in: query
-        name: runtime
-        type: integer
-      - in: query
-        name: title
-        type: string
-      - in: query
-        name: year
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/main.MovieResponse'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/main.Error'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/main.Error'
-        "422":
-          description: Unprocessable Entity
-          schema:
-            $ref: '#/definitions/main.Error'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/main.Error'
-      security:
-      - Bearer: []
-      summary: Update movie
-      tags:
-      - Movies
     post:
       consumes:
       - application/json
-      description: handlers receives Input, validate it then create a new movie record
+      description: handlers receives MovieInputDocs, validate it then create a new
+        movie record
+      parameters:
+      - description: create movie payload
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.MovieInputDocs'
       produces:
       - application/json
       responses:
@@ -319,6 +242,36 @@ paths:
       tags:
       - Movies
   /movies/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete a movie record
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MovieResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - Bearer: []
+      summary: Delete movie
+      tags:
+      - Movies
     get:
       consumes:
       - application/json
@@ -349,6 +302,50 @@ paths:
       summary: Get movie by id
       tags:
       - Movies
+    patch:
+      consumes:
+      - application/json
+      description: update an existing movie record
+      parameters:
+      - description: id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: update movie payload
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.MovieInputDocs'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.MovieResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.Error'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/main.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      security:
+      - Bearer: []
+      summary: Update movie
+      tags:
+      - Movies
   /tokens/authentication:
     post:
       consumes:
@@ -357,7 +354,7 @@ paths:
       parameters:
       - description: Login parameters
         in: body
-        name: loginInput
+        name: input
         required: true
         schema:
           $ref: '#/definitions/main.LoginInput'

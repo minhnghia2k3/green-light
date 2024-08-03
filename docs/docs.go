@@ -121,7 +121,7 @@ const docTemplate = `{
                         "Bearer": []
                     }
                 ],
-                "description": "handlers receives Input, validate it then create a new movie record",
+                "description": "handlers receives MovieInputDocs, validate it then create a new movie record",
                 "consumes": [
                     "application/json"
                 ],
@@ -132,6 +132,17 @@ const docTemplate = `{
                     "Movies"
                 ],
                 "summary": "Create movie",
+                "parameters": [
+                    {
+                        "description": "create movie payload",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.MovieInputDocs"
+                        }
+                    }
+                ],
                 "responses": {
                     "201": {
                         "description": "Created",
@@ -141,146 +152,6 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/main.Error"
-                        }
-                    },
-                    "422": {
-                        "description": "Unprocessable Entity",
-                        "schema": {
-                            "$ref": "#/definitions/main.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/main.Error"
-                        }
-                    }
-                }
-            },
-            "delete": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "delete a movie record",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Movies"
-                ],
-                "summary": "Delete movie",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "update movie input",
-                        "name": "input",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/main.Input"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/main.MovieResponse"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
-                        "schema": {
-                            "$ref": "#/definitions/main.Error"
-                        }
-                    },
-                    "500": {
-                        "description": "Internal Server Error",
-                        "schema": {
-                            "$ref": "#/definitions/main.Error"
-                        }
-                    }
-                }
-            },
-            "patch": {
-                "security": [
-                    {
-                        "Bearer": []
-                    }
-                ],
-                "description": "update an existing movie record",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Movies"
-                ],
-                "summary": "Update movie",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "id",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        },
-                        "collectionFormat": "csv",
-                        "description": "Don't need to set to a pointer, bc slices already heave zero-values nil",
-                        "name": "genres",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "runtime",
-                        "in": "query"
-                    },
-                    {
-                        "type": "string",
-                        "name": "title",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "name": "year",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/main.MovieResponse"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "$ref": "#/definitions/main.Error"
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/main.Error"
                         }
@@ -347,6 +218,121 @@ const docTemplate = `{
                         }
                     }
                 }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "delete a movie record",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Delete movie",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.MovieResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/main.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.Error"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "security": [
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "description": "update an existing movie record",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Movies"
+                ],
+                "summary": "Update movie",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "update movie payload",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/main.MovieInputDocs"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.MovieResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/main.Error"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/main.Error"
+                        }
+                    },
+                    "422": {
+                        "description": "Unprocessable Entity",
+                        "schema": {
+                            "$ref": "#/definitions/main.Error"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/main.Error"
+                        }
+                    }
+                }
             }
         },
         "/tokens/authentication": {
@@ -365,7 +351,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Login parameters",
-                        "name": "loginInput",
+                        "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -600,27 +586,6 @@ const docTemplate = `{
                 }
             }
         },
-        "main.Input": {
-            "type": "object",
-            "properties": {
-                "genres": {
-                    "description": "Don't need to set to a pointer, bc slices already heave zero-values nil",
-                    "type": "array",
-                    "items": {
-                        "type": "string"
-                    }
-                },
-                "runtime": {
-                    "type": "integer"
-                },
-                "title": {
-                    "type": "string"
-                },
-                "year": {
-                    "type": "integer"
-                }
-            }
-        },
         "main.ListMovies": {
             "type": "object",
             "properties": {
@@ -642,6 +607,34 @@ const docTemplate = `{
                 "password": {
                     "type": "string",
                     "example": "myP4SSw3rd"
+                }
+            }
+        },
+        "main.MovieInputDocs": {
+            "type": "object",
+            "properties": {
+                "genres": {
+                    "description": "Don't need to set to a pointer, bc slices already heave zero-values nil",
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "example": [
+                        "actions",
+                        "sci-fi"
+                    ]
+                },
+                "runtime": {
+                    "type": "string",
+                    "example": "195 mins"
+                },
+                "title": {
+                    "type": "string",
+                    "example": "Black panther"
+                },
+                "year": {
+                    "type": "integer",
+                    "example": 2018
                 }
             }
         },

@@ -9,7 +9,6 @@ import (
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/minhnghia2k3/greenlight/docs"
-	_ "github.com/minhnghia2k3/greenlight/docs"
 	"github.com/minhnghia2k3/greenlight/internal/data"
 	"github.com/minhnghia2k3/greenlight/internal/jsonlog"
 	"github.com/minhnghia2k3/greenlight/internal/mailer"

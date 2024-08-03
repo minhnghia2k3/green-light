@@ -8,11 +8,18 @@ import (
 	"net/http"
 )
 
-type Input struct {
-	Title   *string       `json:"title"`
-	Year    *int32        `json:"year"`
-	Runtime *data.Runtime `json:"runtime"`
-	Genres  []string      `json:"genres"` // Don't need to set to a pointer, bc slices already heave zero-values nil
+type MovieInput struct {
+	Title   *string       `json:"title" example:"Black panther"`
+	Year    *int32        `json:"year" example:"2018"`
+	Runtime *data.Runtime `json:"runtime" example:"195 mins"`
+	Genres  []string      `json:"genres" example:"actions,sci-fi"` // Don't need to set to a pointer, bc slices already heave zero-values nil
+}
+
+type MovieInputDocs struct {
+	Title   *string  `json:"title" example:"Black panther"`
+	Year    *int32   `json:"year" example:"2018"`
+	Runtime *string  `json:"runtime" example:"195 mins"`
+	Genres  []string `json:"genres" example:"actions,sci-fi"` // Don't need to set to a pointer, bc slices already heave zero-values nil
 }
 
 type ListMovies struct {
@@ -25,7 +32,8 @@ type MovieResponse struct {
 }
 
 // @Summary      Create movie
-// @Description  handlers receives Input, validate it then create a new movie record
+// @Description  handlers receives MovieInputDocs, validate it then create a new movie record
+// @Param input body MovieInputDocs true "create movie payload"
 // @Tags         Movies
 // @Accept 		 json
 // @Produce      json
@@ -36,7 +44,7 @@ type MovieResponse struct {
 // @Failure      500  {object} Error
 // @Router       /movies [post]
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
-	var input Input
+	var input MovieInput
 
 	err := app.readJSON(w, r, &input)
 	if err != nil {
@@ -168,7 +176,7 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 // @Summary      Update movie
 // @Description  update an existing movie record
 // @Param id path int true "id"
-// @Param input query Input true "update movie input"
+// @Param input body MovieInputDocs true "update movie payload"
 // @Security Bearer
 // @Tags         Movies
 // @Accept 		 json
@@ -178,7 +186,7 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 // @Failure      404  {object} Error
 // @Failure      422  {object} Error
 // @Failure      500  {object} Error
-// @Router       /movies [patch]
+// @Router       /movies/{id} [patch]
 func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIdParam(r)
 	if err != nil {
@@ -199,7 +207,7 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	// Read input data then validate
-	var input Input
+	var input MovieInput
 
 	err = app.readJSON(w, r, &input)
 	if err != nil {
@@ -252,7 +260,6 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 // @Summary      Delete movie
 // @Description  delete a movie record
 // @Param id path int true "id"
-// @Param   input      body Input true  "update movie input"
 // @Security Bearer
 // @Tags         Movies
 // @Accept 		 json
@@ -260,7 +267,7 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 // @Success      200  {object} MovieResponse
 // @Failure      404  {object} Error
 // @Failure      500  {object} Error
-// @Router       /movies [delete]
+// @Router       /movies/{id} [delete]
 func (app *application) deleteMovieHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIdParam(r)
 	if err != nil {
