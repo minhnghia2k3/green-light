@@ -1,7 +1,0 @@
-build:
-  docker:
-    web: Dockerfile
-  config:
-    DATABASE_URL: "postgres://u1q020ghv28hsb:pdd7d92523ae32a9616d93800562e3ecd8732b3c3aa506fa9bfb3ee3036e19c9a@c9uss87s9bdb8n.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com:5432/da314ekbdj62pb"
-run:
-  web: ./bin/linux_amd64/api

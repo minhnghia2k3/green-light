@@ -1,5 +1,5 @@
 <div style="display: flex; justify-content: center;">
-    <img height="200" src="assets/golang.png" width="200"/>
+    <img alt="golang-icon" height="300" src="assets/golang.png" width="300"/>
 </div>
 
 # Greenlight
@@ -29,7 +29,9 @@ Greenlight is a **Go application** offers a **reliable, fast, and secure** API f
 
 ## Diagrams
 
-![Database diagram](assets/greenlight.png)
+![Database Diagram](assets/greenlight.png)
+
+![Data Protection Diagram](assets/data-protection.png)
 
 ## Prerequisites
 
@@ -38,7 +40,7 @@ Greenlight is a **Go application** offers a **reliable, fast, and secure** API f
 - PostgresDB running on port `:5432` by default.
 - [Mailtrap](https://mailtrap.io/) API token
 
-# Installation
+## Installation
 
     $ git clone https://github.com/minhnghia2k3/green-light.git
 
