@@ -91,9 +91,14 @@ func main() {
 
 	// Read command-line flags
 	port := os.Getenv("PORT")
+	smtpPort := os.Getenv("SMTP_PORT")
 	intPort, err := strconv.Atoi(port)
 	if err != nil {
 		intPort = 4000
+	}
+	smtpIntPort, err := strconv.Atoi(smtpPort)
+	if err != nil {
+		smtpIntPort = 25
 	}
 	flag.IntVar(&cfg.port, "port", intPort, "API server port")
 	flag.StringVar(&cfg.env, "env", os.Getenv("ENVIRONMENT"), "Environment (development|staging|production)")
@@ -107,8 +112,8 @@ func main() {
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 
-	flag.StringVar(&cfg.smtp.host, "smtp-host", "smtp.mailtrap.io", "SMTP host")
-	flag.IntVar(&cfg.smtp.port, "smtp-port", 2525, "SMTP port")
+	flag.StringVar(&cfg.smtp.host, "smtp-host", os.Getenv("SMTP_HOST"), "SMTP host")
+	flag.IntVar(&cfg.smtp.port, "smtp-port", smtpIntPort, "SMTP port")
 	flag.StringVar(&cfg.smtp.username, "smtp-username", os.Getenv("SMTP_USERNAME"), "SMTP username")
 	flag.StringVar(&cfg.smtp.password, "smtp-password", os.Getenv("SMTP_PASSWORD"), "SMTP password")
 	flag.StringVar(&cfg.smtp.sender, "smtp-sender", os.Getenv("SMTP_SENDER"), "SMTP sender")

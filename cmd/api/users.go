@@ -58,6 +58,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		app.serverErrorResponse(w, r, err)
 		return
 	}
+
 	// Validate input
 	v := validation.New()
 	if data.ValidateUser(v, &user); !v.Valid() {
@@ -78,13 +79,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	// Add `movie:read` default permission
-	err = app.models.Permissions.AddForUser(user.ID, "movie:read")
-	if err != nil {
-		app.serverErrorResponse(w, r, err)
-		return
-	}
-
+	// Activation token
 	token, err := app.models.Tokens.New(user.ID, 3*24*time.Hour, data.ScopeActivation)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -104,9 +99,17 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		if err != nil {
 			// If error, use log instead sending http error.
 			app.logger.PrintError(err, nil)
+			return
 		}
 		app.logger.PrintInfo("sending email successfully", nil)
 	})
+
+	// Add `movie:read` default permission
+	err = app.models.Permissions.AddForUser(user.ID, "movie:read")
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
 
 	// http.StatusAccepted indicates that the request has been accepted,
 	// but processing has not been completed.
