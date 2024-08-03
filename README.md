@@ -49,7 +49,8 @@ Greenlight is a **Go application** offers a **reliable, fast, and secure** API f
       $ cp .env.example .env
 
 - Running application
-
+      
+      $ make migrate.up
       $ make run
 
 ## License
