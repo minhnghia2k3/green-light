@@ -26,7 +26,6 @@ type TokenInput struct {
 // registerUserHandler function handle register a new user, and sending email in the background.
 // @Summary      Register account
 // @Description  register user account
-// @Param id query int true "id"
 // @Param   input      body RegisterUserInput true "register user input"
 // @Tags         Users
 // @Accept 		 json
