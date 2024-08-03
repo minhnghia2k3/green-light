@@ -5,7 +5,8 @@ FROM golang:1.22.5-alpine3.19 as builder
 RUN apk add --no-cache curl tar
 
 # Install golang-migrate
-RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.14.1/migrate.linux-amd64.tar.gz | tar -xz -C /usr/local/bin
+RUN curl -L https://github.com/golang-migrate/migrate/releases/download/v4.14.1/migrate.linux-amd64.tar.gz | tar xvz && \
+    mv migrate $(go env GOPATH)/bin/migrate
 
 WORKDIR /app
 COPY . .
