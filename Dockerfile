@@ -13,7 +13,7 @@ COPY go.mod go.sum ./
 
 RUN go mod download
 
-OPY *.go ./
+COPY *.go ./
 
 # Compile application
 RUN go build -ldflags '-s -w' -o ./bin/api ./cmd/api
