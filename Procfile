@@ -1,1 +1,1 @@
-web: ./bin/api
+web: ./bin/linux_amd64/api

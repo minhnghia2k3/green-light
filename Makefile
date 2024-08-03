@@ -42,6 +42,10 @@ migrate.up:
 migrate.down: confirm
 	migrate -path=./migrations -database=${DATABASE_URL} down 1
 
+## docker.build: build a docker image with DATABASE_URL parameter
+docker.build:
+	docker build --build-arg DATABASE_URL=${DATABASE_URL} -t greenlight  .
+
 ## docker.start: start a specific docker container
 docker.start:
 	docker start ${CONTAINER_NAME}
@@ -95,4 +99,4 @@ exec:
 
 
 
-PHONY: run healthcheck help confirm psql migrate.create migrate.up migrate.down docker.start docker.stop go/vendor build
+PHONY: run healthcheck help confirm psql migrate.create migrate.up migrate.down docker.build docker.start docker.stop go/vendor build
