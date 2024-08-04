@@ -66,7 +66,7 @@ func (m Mailer) Send(recipient, templateFile string, data any) error {
 		err = m.dialer.DialAndSend(msg)
 		// If worked return inl
 		if err == nil {
-			return err
+			return nil
 		}
 
 		// If not wait for 500ms and retry

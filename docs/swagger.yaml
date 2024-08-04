@@ -104,6 +104,18 @@ definitions:
       password:
         type: string
     type: object
+  main.ResetPasswordInput:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+    type: object
+  main.ResetTokenResponse:
+    properties:
+      message:
+        example: an email will be sent to you containing password reset instructions
+        type: string
+    type: object
   main.Status:
     properties:
       status:
@@ -126,6 +138,13 @@ definitions:
   main.TokenResponse:
     properties:
       authentication_token:
+        type: string
+    type: object
+  main.UpdateUserInput:
+    properties:
+      password:
+        type: string
+      token:
         type: string
     type: object
   main.UserResponse:
@@ -384,6 +403,41 @@ paths:
       summary: Create authentication token
       tags:
       - Authentications
+  /tokens/password-reset:
+    post:
+      consumes:
+      - application/json
+      description: request a token for reset password, must provide *valid* and *activated*
+        email address
+      parameters:
+      - description: Reset password input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.ResetPasswordInput'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/main.ResetTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/main.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Request a token for reset password
+      tags:
+      - Authentications
   /users:
     post:
       consumes:
@@ -424,12 +478,12 @@ paths:
       - application/json
       description: activate user account
       parameters:
-      - description: plain text token input
+      - description: update user input
         in: body
         name: input
         required: true
         schema:
-          $ref: '#/definitions/main.TokenInput'
+          $ref: '#/definitions/main.UpdateUserInput'
       produces:
       - application/json
       responses:
@@ -454,6 +508,41 @@ paths:
           schema:
             $ref: '#/definitions/main.Error'
       summary: Activate user account
+      tags:
+      - Users
+  /users/password:
+    put:
+      consumes:
+      - application/json
+      description: change user current password, must provide valid *reset password*
+        token.
+      parameters:
+      - description: plain text token input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.TokenInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/main.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Change user current password
       tags:
       - Users
 securityDefinitions:

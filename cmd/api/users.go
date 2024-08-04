@@ -23,6 +23,11 @@ type TokenInput struct {
 	TokenPlainText string `json:"token"`
 }
 
+type UpdateUserInput struct {
+	Password       string `json:"password"`
+	TokenPlainText string `json:"token"`
+}
+
 // registerUserHandler function handle register a new user, and sending email in the background.
 // @Summary      Register account
 // @Description  register user account
@@ -121,7 +126,7 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 
 // @Summary      Activate user account
 // @Description  activate user account
-// @Param   input      body TokenInput true "plain text token input"
+// @Param   input      body UpdateUserInput true "update user input"
 // @Tags         Users
 // @Accept 		 json
 // @Produce      json
@@ -188,4 +193,84 @@ func (app *application) activeUserHandler(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
+}
+
+// Verify the password reset token and set a new password for the user
+// @Summary      Change user current password
+// @Description  change user current password, must provide valid *reset password* token.
+// @Param   input      body TokenInput true "plain text token input"
+// @Tags         Users
+// @Accept 		 json
+// @Produce      json
+// @Success      200  {object} UserResponse
+// @Failure      400  {object} Error
+// @Failure      422  {object} Error
+// @Failure      500  {object} Error
+// @Router       /users/password [put]
+func (app *application) updateUserPasswordHandler(w http.ResponseWriter, r *http.Request) {
+	// Parse and validate the user's new password and password reset token.
+	var input UpdateUserInput
+
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err.Error())
+		return
+	}
+
+	v := validation.New()
+
+	data.ValidatePasswordPlaintext(v, input.Password)
+	data.ValidateTokenPlainText(v, input.TokenPlainText)
+
+	if !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	// Check token plain text in the database
+	user, err := app.models.Users.GetForToken(data.ScopePasswordReset, input.TokenPlainText)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			v.AddError("token", "invalid or expired password reset token")
+			app.failedValidationResponse(w, r, v.Errors)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	// Hash plain password and store into pointer `user` struct
+	err = user.Password.Set(input.Password)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	err = app.models.Users.Update(user)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrConflictEdit):
+			app.editConflictResponse(w, r)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	// Delete all password reset tokens for the user
+	err = app.models.Tokens.DeleteAllForUser(data.ScopePasswordReset, user.ID)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	// Send user confirm message
+	env := envelop{"message": "your password was successfully reset"}
+
+	err = app.writeJSON(w, http.StatusOK, env, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+
 }

@@ -13,6 +13,7 @@ import (
 const (
 	ScopeActivation     = "activation"
 	ScopeAuthentication = "authentication"
+	ScopePasswordReset  = "password-reset"
 )
 
 type Token struct {
@@ -21,6 +22,26 @@ type Token struct {
 	UserID    int64     `json:"-"`
 	Expiry    time.Time `json:"expiry"`
 	Scope     string    `json:"-"`
+}
+
+type TokenModel struct {
+	DB *sql.DB
+}
+
+// The New method is a shortcut which creates a new Token struct and then inserts the
+// data into tokens table
+func (m TokenModel) New(userID int64, ttl time.Duration, scope string) (*Token, error) {
+	token, err := generateToken(userID, ttl, scope)
+	if err != nil {
+		return nil, err
+	}
+
+	err = m.Insert(token)
+	if err != nil {
+		return nil, err
+	}
+
+	return token, nil
 }
 
 // generateToken will create an randomBytes then encode  the byte slice to
@@ -59,26 +80,6 @@ func generateToken(userID int64, ttl time.Duration, scope string) (*Token, error
 func ValidateTokenPlainText(v *validation.Validator, tokenPlainText string) {
 	v.Check(tokenPlainText != "", "token", "must be provided")
 	v.Check(len(tokenPlainText) == 26, "token", "must be 26 bytes long")
-}
-
-type TokenModel struct {
-	DB *sql.DB
-}
-
-// The New method is a shortcut which creates a new Token struct and then inserts the
-// data into tokens table
-func (m TokenModel) New(userID int64, ttl time.Duration, scope string) (*Token, error) {
-	token, err := generateToken(userID, ttl, scope)
-	if err != nil {
-		return nil, err
-	}
-
-	err = m.Insert(token)
-	if err != nil {
-		return nil, err
-	}
-
-	return token, nil
 }
 
 // Insert adds the data for a specific token to the tokens table.
