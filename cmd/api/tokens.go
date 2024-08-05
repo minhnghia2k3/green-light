@@ -17,6 +17,10 @@ type ResetPasswordInput struct {
 	Email string `json:"email" example:"john@example.com"`
 }
 
+type CreateActivationInput struct {
+	Email string `json:"email" example:"john@example.com"`
+}
+
 type TokenResponse struct {
 	AuthenticationToken string `json:"authentication_token"`
 }
@@ -158,7 +162,7 @@ func (app *application) createPasswordResetTokenHandler(w http.ResponseWriter, r
 	}
 
 	// Email the user with their password reset token.
-	go func() {
+	app.background(func() {
 		dynamicData := map[string]any{
 			"passwordResetToken": token.Plaintext,
 		}
@@ -170,9 +174,86 @@ func (app *application) createPasswordResetTokenHandler(w http.ResponseWriter, r
 		}
 
 		app.logger.PrintInfo("sending reset password email successfully", nil)
-	}()
+	})
 
 	env := envelop{"message": "an email will be sent to you containing password reset instructions"}
+
+	err = app.writeJSON(w, http.StatusAccepted, env, nil)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+	}
+}
+
+// Generate a new activation token, then send it to user's email
+// @Summary      Generate a new activation token
+// @Description  receive an email address, check user's activation status,
+// then generate and send activation within 3 days expiration to user
+// @Param		 input      body CreateActivationInput true "Create activation input"
+// @Tags         Authentications
+// @Accept 		 json
+// @Produce      json
+// @Success      202  {object} ResetTokenResponse
+// @Failure      400  {object} Error
+// @Failure      422  {object} Error
+// @Failure      500  {object} Error
+// @Router       /tokens/activation [post]
+func (app *application) createActivationTokenHandler(w http.ResponseWriter, r *http.Request) {
+	// Parse and validate input
+	var input CreateActivationInput
+
+	err := app.readJSON(w, r, &input)
+	if err != nil {
+		app.badRequestResponse(w, r, err.Error())
+		return
+	}
+
+	v := validation.New()
+	if data.ValidateEmail(v, input.Email); !v.Valid() {
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	// Receive user from validated email
+	user, err := app.models.Users.GetByEmail(input.Email)
+	if err != nil {
+		switch {
+		case errors.Is(err, data.ErrRecordNotFound):
+			v.AddError("email", "no matching email address found")
+			app.failedValidationResponse(w, r, v.Errors)
+		default:
+			app.serverErrorResponse(w, r, err)
+		}
+		return
+	}
+
+	// Check is user's activated status
+	if user.Activated {
+		v.AddError("email", "user has already been activated")
+		app.failedValidationResponse(w, r, v.Errors)
+		return
+	}
+
+	// Otherwise, generate & send a new activation token to user's email
+	token, err := app.models.Tokens.New(user.ID, 3*24*time.Hour, data.ScopeActivation)
+	if err != nil {
+		app.serverErrorResponse(w, r, err)
+		return
+	}
+
+	app.background(func() {
+		dynamicData := map[string]any{
+			"activationToken": token.Plaintext,
+		}
+
+		err = app.mailer.Send(user.Email, "token_activation.tmpl", dynamicData)
+		if err != nil {
+			app.logger.PrintError(err, nil)
+			return
+		}
+		app.logger.PrintInfo("sending token activation email successfully", nil)
+	})
+
+	env := envelop{"message": "an email will be sent to you containing activation instructions"}
 
 	err = app.writeJSON(w, http.StatusAccepted, env, nil)
 	if err != nil {

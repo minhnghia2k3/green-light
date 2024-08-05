@@ -48,6 +48,12 @@ definitions:
       version:
         type: integer
     type: object
+  main.CreateActivationInput:
+    properties:
+      email:
+        example: john@example.com
+        type: string
+    type: object
   main.Error:
     properties:
       error:
@@ -365,6 +371,40 @@ paths:
       summary: Update movie
       tags:
       - Movies
+  /tokens/activation:
+    post:
+      consumes:
+      - application/json
+      description: receive an email address, check user's activation status,
+      parameters:
+      - description: Create activation input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/main.CreateActivationInput'
+      produces:
+      - application/json
+      responses:
+        "202":
+          description: Accepted
+          schema:
+            $ref: '#/definitions/main.ResetTokenResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/main.Error'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/main.Error'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/main.Error'
+      summary: Generate a new activation token
+      tags:
+      - Authentications
   /tokens/authentication:
     post:
       consumes:

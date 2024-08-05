@@ -4,7 +4,7 @@
 
 # Greenlight
 
-Greenlight is a **Go application** offers a **reliable, fast, and secure** API for movies management.
+[Greenlight](https://minhnghia2k3-greenlight-f2bc5d52ac1f.herokuapp.com/swagger/index.html) is a **Go application** offers a **reliable, fast, and secure** API for movies management.
 
 ## Key features
 🔧 Seamlessly perform **CRUD** operations on movie data
