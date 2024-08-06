@@ -5,7 +5,7 @@ import (
 	"expvar"
 	"fmt"
 	"github.com/minhnghia2k3/greenlight/internal/data"
-	"github.com/minhnghia2k3/greenlight/internal/validation"
+	"github.com/pascaldekloe/jwt"
 	"github.com/tomasen/realip"
 	"golang.org/x/time/rate"
 	"net/http"
@@ -21,6 +21,7 @@ type metricsResponseWriter struct {
 	headerWritten bool
 }
 
+// ================== APPLICATION MIDDLEWARES
 func (app *application) recoverPanic(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// defer function which always be run in the event of panic
@@ -98,6 +99,38 @@ func (app *application) rateLimit(next http.Handler) http.Handler {
 	})
 }
 
+func (app *application) enableCORS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Vary", "Origin")
+		w.Header().Add("Vary", "Access-Control-Request-Method")
+
+		origin := r.Header.Get("Origin")
+
+		if origin != "" {
+			// Loop through the list of trusted origins, checking to see
+			// if the request origin matches one of them
+			for i := range app.config.cors.trustedOrigins {
+				if origin == app.config.cors.trustedOrigins[i] {
+					w.Header().Set("Access-Control-Allow-Origin", origin)
+
+					if r.Method == http.MethodOptions && r.Header.Get("Access-Control-Request-Method") != "" {
+						// Set the preflight response headers
+						w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, PUT, PATCH, DELETE")
+						w.Header().Set("Access-Control-Allow-Headers", "Authentication, Content-Type")
+
+						w.WriteHeader(http.StatusOK)
+					}
+
+					break
+				}
+			}
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
+// ================== AUTHENTICATION MIDDLEWARES
 func (app *application) authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// This header indicates to any caches that the response may vary based on the value of
@@ -123,16 +156,35 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 
 		token := headerParts[1]
 
-		// Validate the token
-		v := validation.New()
-
-		if data.ValidateTokenPlainText(v, token); !v.Valid() {
+		// Parse the JWT and extract the claims
+		claims, err := jwt.HMACCheck([]byte(token), []byte(app.config.jwt.secret))
+		if err != nil {
 			app.invalidAuthenticationTokenResponse(w, r)
 			return
 		}
 
-		// Retrieve the details of the user associated with the authentication token
-		user, err := app.models.Users.GetForToken(data.ScopeAuthentication, token)
+		// Validate claims
+		switch {
+		case !claims.Valid(time.Now()):
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		case claims.Issuer != app.config.jwt.issuer:
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		case !claims.AcceptAudience(app.config.jwt.issuer):
+			app.invalidAuthenticationTokenResponse(w, r)
+			return
+		}
+
+		// At this point, JWT is OK. Extract the userID from the claims subject and convert into int64
+		userID, err := strconv.ParseInt(claims.Subject, 10, 64)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+
+		// Look up the user record from the database
+		user, err := app.models.Users.Get(userID)
 		if err != nil {
 			switch {
 			case errors.Is(err, data.ErrRecordNotFound):
@@ -143,7 +195,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 			return
 		}
 
-		// Add the user information to the request context
+		// Add the user record to the request context
 		r = app.contextSetUser(r, user)
 
 		// Call the next handler chain
@@ -204,37 +256,6 @@ func (app *application) requirePermission(code string, next http.HandlerFunc) ht
 	})
 
 	return app.requireActivatedUser(fn)
-}
-
-func (app *application) enableCORS(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Vary", "Origin")
-		w.Header().Add("Vary", "Access-Control-Request-Method")
-
-		origin := r.Header.Get("Origin")
-
-		if origin != "" {
-			// Loop through the list of trusted origins, checking to see
-			// if the request origin matches one of them
-			for i := range app.config.cors.trustedOrigins {
-				if origin == app.config.cors.trustedOrigins[i] {
-					w.Header().Set("Access-Control-Allow-Origin", origin)
-
-					if r.Method == http.MethodOptions && r.Header.Get("Access-Control-Request-Method") != "" {
-						// Set the preflight response headers
-						w.Header().Set("Access-Control-Allow-Methods", "OPTIONS, PUT, PATCH, DELETE")
-						w.Header().Set("Access-Control-Allow-Headers", "Authentication, Content-Type")
-
-						w.WriteHeader(http.StatusOK)
-					}
-
-					break
-				}
-			}
-		}
-
-		next.ServeHTTP(w, r)
-	})
 }
 
 // ================== METRICS MIDDLEWARES

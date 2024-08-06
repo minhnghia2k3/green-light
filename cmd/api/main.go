@@ -51,6 +51,10 @@ type config struct {
 	cors struct {
 		trustedOrigins []string
 	}
+	jwt struct {
+		secret string
+		issuer string
+	}
 }
 
 // Application struct hold the HTTP handlers, helpers, and middleware
@@ -100,18 +104,24 @@ func main() {
 	if err != nil {
 		smtpIntPort = 25
 	}
+	// APPLICATION
 	flag.IntVar(&cfg.port, "port", intPort, "API server port")
 	flag.StringVar(&cfg.env, "env", os.Getenv("ENVIRONMENT"), "Environment (development|staging|production)")
+	flag.StringVar(&cfg.jwt.secret, "jwt-secret", os.Getenv("JWT_SECRET"), "JWT secret")
+	flag.StringVar(&cfg.jwt.issuer, "jwt-issuer", os.Getenv("JWT_ISSUER"), "JWT issuer")
 
+	// POSTGRES DATABASE
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("DATABASE_URL"), "PostgreSQL DSN")
 	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 25, "PostgreSQL max open connections")
 	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 25, "PostgreSQL max idle connections")
 	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "PostgreSQL max connection idle time")
 
+	// RATE LIMITER
 	flag.Float64Var(&cfg.limiter.rps, "limiter-rps", 2, "Rate limiter maximum requests per second")
 	flag.IntVar(&cfg.limiter.burst, "limiter-burst", 4, "Rate limiter maximum burst")
 	flag.BoolVar(&cfg.limiter.enabled, "limiter-enabled", true, "Enable rate limiter")
 
+	// SMTP SERVER
 	flag.StringVar(&cfg.smtp.host, "smtp-host", os.Getenv("SMTP_HOST"), "SMTP host")
 	flag.IntVar(&cfg.smtp.port, "smtp-port", smtpIntPort, "SMTP port")
 	flag.StringVar(&cfg.smtp.username, "smtp-username", os.Getenv("SMTP_USERNAME"), "SMTP username")
@@ -123,8 +133,8 @@ func main() {
 		return nil
 	})
 
+	// VERSIONING
 	displayVersion := flag.Bool("version", false, "Display version and exit")
-
 	flag.Parse()
 
 	if *displayVersion {

@@ -4,7 +4,9 @@ import (
 	"errors"
 	"github.com/minhnghia2k3/greenlight/internal/data"
 	"github.com/minhnghia2k3/greenlight/internal/validation"
+	"github.com/pascaldekloe/jwt"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -90,17 +92,34 @@ func (app *application) createAuthenticationTokenHandler(w http.ResponseWriter, 
 		return
 	}
 
-	// Otherwise, if the password is correct, we generate a new token with a 24h expiry time
-	// with the scope "authentication".
-	token, err := app.models.Tokens.New(user.ID, 24*time.Hour, data.ScopeAuthentication)
+	/*
+		// Otherwise, if the password is correct, we generate a new token with a 24h expiry time
+		// with the scope "authentication".
+		token, err := app.models.Tokens.New(user.ID, 24*time.Hour, data.ScopeAuthentication)
+		if err != nil {
+			app.serverErrorResponse(w, r, err)
+			return
+		}
+	*/
 
+	// Create a JWT claims struct
+	var claims jwt.Claims
+	claims.Subject = strconv.FormatInt(user.ID, 10)
+	claims.Issued = jwt.NewNumericTime(time.Now())
+	claims.NotBefore = jwt.NewNumericTime(time.Now())
+	claims.Expires = jwt.NewNumericTime(time.Now().Add(24 * time.Hour))
+	claims.Issuer = app.config.jwt.issuer
+	claims.Audiences = []string{app.config.jwt.issuer}
+
+	// Sign the JWT with HMAC-SHA256 algorithm and the secret key
+	jwtBytes, err := claims.HMACSign(jwt.HS256, []byte(app.config.jwt.secret))
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
-	// Encode the token to JSON and send it in response along with 201 Created status code
-	err = app.writeJSON(w, http.StatusCreated, envelop{"authentication_token": token}, nil)
+	// Convert the []byte slice to a string and return it in a JSON response
+	err = app.writeJSON(w, http.StatusCreated, envelop{"authentication_token": string(jwtBytes)}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
